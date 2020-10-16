@@ -7,12 +7,17 @@ use crate::types::{Gif, Frame, ColorMap, ExtensionBlock, GraphicControlExtension
 
 pub mod steps;
 
+/// Color output mode
 #[derive(PartialEq)]
 pub enum ColorOutput {
+    /// Every byte of the raster data is expanded to 4 bytes (R G B A).
+    /// In this mode the ColorMap is useless, for this reason it is not returned in the Gif object.
     RGBA,
+    /// Normal ColorMap index color mapping.
     ColorMap,
 }
 
+/// Decode a gif encoded source.
 pub fn decode(
     mut source: impl Read,
     color_output: ColorOutput,
@@ -45,7 +50,7 @@ pub fn decode(
     })
 }
 
-pub fn rgba_raster_data(
+fn rgba_raster_data(
     frame: &Frame,
     global_color_map: Option<&ColorMap>,
 ) -> Vec<u8> {
@@ -75,7 +80,7 @@ pub fn rgba_raster_data(
         .collect()
 }
 
-pub fn table_index_to_rgba(
+fn table_index_to_rgba(
     index: u8,
     color_map: &ColorMap,
     maybe_transparent_color_index: Option<u8>,
@@ -90,7 +95,7 @@ pub fn table_index_to_rgba(
     vec![rgba.r, rgba.g, rgba.b, alpha]
 }
 
-pub fn frames(bytes: &Vec<u8>, cursor: usize) -> (Vec<Frame>, usize) {
+fn frames(bytes: &Vec<u8>, cursor: usize) -> (Vec<Frame>, usize) {
     let mut mut_index = cursor;
     let mut frames: Vec<Frame> = Vec::new();
 
@@ -103,7 +108,7 @@ pub fn frames(bytes: &Vec<u8>, cursor: usize) -> (Vec<Frame>, usize) {
     (frames, mut_index)
 }
 
-pub fn frame(bytes: &Vec<u8>, cursor: usize) -> (Frame, usize) {
+fn frame(bytes: &Vec<u8>, cursor: usize) -> (Frame, usize) {
     let mut index = cursor;
     let mut graphic_control_extension: Option<GraphicControlExtension> = None;
 

@@ -5,7 +5,8 @@ use crate::types::{Gif, Frame, ColorMap, ExtensionBlock, GraphicControlExtension
 
 pub mod steps;
 
-/// Color output mode
+/// Color output mode.
+/// This setting affects the raster data of each decoded gif frame.
 #[derive(PartialEq)]
 pub enum ColorOutput {
     /// Every byte of the raster data is expanded to 4 bytes (R G B A).

@@ -31,6 +31,9 @@ pub struct Rgb {
 pub struct Frame {
     pub image_descriptor: ImageDescriptor,
     pub local_color_map: Option<ColorMap>,
+    /// raster_data representation depends on the yaged::decoder::ColorOutput mode setting.
+    /// If yaged::decoder::ColorOutput::ColorMap is set, the nth byte of the raster_data contains the ColorMap index of the nth pixel.
+    /// If yaged::decoder::ColorOutput::RGBA is set, every nth byte of the raster_data is expanded to 4 bytes, the 4 bytes contains respectively the values R G B A
     pub raster_data: Vec<u8>,
     pub graphic_control_extension: Option<GraphicControlExtension>,
 }

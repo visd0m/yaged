@@ -16,10 +16,11 @@ let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
 let gif = decode(file, ColorOutput::RGBA).unwrap();
 ```
 
-#### Todos
+#### Still work to do
 
 - [ ] handle interlaced flag
 - [ ] handle disposal method
 - [ ] handle user input
+- [ ] support more extension blocks
 - [ ] decoding optimization
 - [ ] implements gif encoding

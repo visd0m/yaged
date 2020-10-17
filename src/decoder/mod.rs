@@ -1,8 +1,6 @@
 #[cfg(test)]
-use std::fs::File;
+use {std::fs::File, std::path::Path};
 use std::io::Read;
-#[cfg(test)]
-use std::path::Path;
 use crate::types::{Gif, Frame, ColorMap, ExtensionBlock, GraphicControlExtension};
 
 pub mod steps;

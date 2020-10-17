@@ -3,7 +3,6 @@
 //! #### Decoding
 //! ```
 //! use {std::fs::File, std::path::Path};
-//! use std::arch::x86::_mm_aeskeygenassist_si128;
 //!
 //! let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
 //! let gif = yaged::decoder::decode(file, yaged::decoder::ColorOutput::ColorMap).unwrap();

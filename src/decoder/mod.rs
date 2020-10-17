@@ -1,9 +1,9 @@
+use crate::types::{ColorMap, ExtensionBlock, Frame, Gif, GraphicControlExtension};
+use std::io::Read;
 #[cfg(test)]
 use {std::fs::File, std::path::Path};
-use std::io::Read;
-use crate::types::{Gif, Frame, ColorMap, ExtensionBlock, GraphicControlExtension};
 
-pub mod steps;
+mod steps;
 
 /// Color output mode.
 /// This setting affects the raster data of each decoded gif frame.
@@ -49,10 +49,7 @@ pub fn decode(
     })
 }
 
-fn rgba_raster_data(
-    frame: &Frame,
-    global_color_map: Option<&ColorMap>,
-) -> Vec<u8> {
+fn rgba_raster_data(frame: &Frame, global_color_map: Option<&ColorMap>) -> Vec<u8> {
     let color_map = if frame.image_descriptor.m {
         frame
             .local_color_map

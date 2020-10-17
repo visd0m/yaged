@@ -9,10 +9,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-jobs:
-  defaults:
-    runs-on: ubuntu-latest
+defaults:
+  runs-on: ubuntu-latest
 
+jobs:
   build:
     steps:
     - uses: actions/checkout@v2

@@ -1,9 +1,12 @@
 //! Gif encoder/decoder bases on [GIF89a specification](https://www.w3.org/Graphics/GIF/spec-gif89a.txt).
 //!
 //! #### Decoding
-//! ```rust
+//! ```
+//! use {std::fs::File, std::path::Path};
+//! use std::arch::x86::_mm_aeskeygenassist_si128;
+//!
 //! let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
-//! let gif = decode(file, ColorOutput::ColorMap).unwrap();
+//! let gif = yaged::decoder::decode(file, yaged::decoder::ColorOutput::ColorMap).unwrap();
 //! ```
 
 pub mod decoder;

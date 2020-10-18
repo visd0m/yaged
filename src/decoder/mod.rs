@@ -159,5 +159,7 @@ pub fn should_decode() {
         } else {
             assert!(frame.local_color_map.is_none())
         }
+
+        assert!(frame.graphic_control_extension.is_some())
     });
 }

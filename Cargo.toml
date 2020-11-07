@@ -1,6 +1,6 @@
 [package]
 name = "yaged"
-version = "1.0.0"
+version = "0.2.0"
 authors = ["Domenico Visconti <domenico.visconti819@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Yet another gif encoder decoder"

@@ -16,14 +16,7 @@ pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (ScreenDescriptor, usize) {
     let background: u8 = screen_descriptor[5];
 
     (
-        ScreenDescriptor {
-            width: screen_width,
-            height: screen_height,
-            m,
-            cr,
-            pixel,
-            background,
-        },
+        ScreenDescriptor::new(screen_width, screen_height, m, cr, pixel, background),
         to_index,
     )
 }

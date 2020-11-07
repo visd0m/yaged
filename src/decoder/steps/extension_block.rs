@@ -6,10 +6,7 @@ pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (Option<ExtensionBlock>, usize)
     match label {
         0xf9 => {
             let (block, cursor) = graphic_control_extension(bytes, cursor + 2);
-            (
-                Some(ExtensionBlock::GraphicControlExtension(block)),
-                cursor,
-            )
+            (Some(ExtensionBlock::GraphicControlExtension(block)), cursor)
         }
         _ => (None, cursor + 2),
     }
@@ -32,13 +29,13 @@ pub fn graphic_control_extension(
     };
 
     (
-        GraphicControlExtension {
+        GraphicControlExtension::new(
             disposal_method,
-            user_input: user_input_flag,
-            transparent_color: transparent_color_flag,
+            user_input_flag,
+            transparent_color_flag,
             delay_time,
             transparent_color_index,
-        },
+        ),
         cursor + if transparent_color_flag { 6 } else { 5 },
     )
 }

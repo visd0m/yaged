@@ -6,17 +6,17 @@ use {std::fs::File, std::path::Path};
 mod steps;
 
 /// Color output mode.
-/// This setting affects the raster data of each decoded gif frame.
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum ColorOutput {
     /// Every byte of the raster data is expanded to 4 bytes (R G B A).
-    /// In this mode the ColorMap is useless, for this reason it is not returned in the Gif object.
+    /// Setting this color output the rgba_raster_data will be present in the resulting Gif.
     RGBA,
     /// Normal ColorMap index color mapping.
     ColorMap,
 }
 
 /// Decode a gif encoded source.
+/// If RGBA ColorOutput is set, the rgba_raster_data is set in the resulting Gif.
 pub fn decode(
     mut source: impl Read,
     color_output: ColorOutput,
@@ -25,51 +25,35 @@ pub fn decode(
     source.read_to_end(bytes)?;
 
     let (signature, cursor) = steps::signature::decode(&bytes, 0);
-    let (mut screen_descriptor, cursor) = steps::screen_descriptor::decode(&bytes, cursor);
-    let (mut global_color_map, cursor) =
-        steps::color_map::decode(&bytes, screen_descriptor.pixel, screen_descriptor.m, cursor);
-    let (mut frames, _cursor) = frames(bytes, cursor);
+    let (screen_descriptor, cursor) = steps::screen_descriptor::decode(&bytes, cursor);
+    let (global_color_map, cursor) = steps::color_map::decode(
+        &bytes,
+        screen_descriptor.pixel(),
+        screen_descriptor.m(),
+        cursor,
+    );
+    let (frames, _cursor) = frames(bytes, &color_output, global_color_map.as_ref(), cursor);
 
-    if color_output == ColorOutput::RGBA {
-        for frame in &mut frames {
-            let rgba_raster_data = rgba_raster_data(&frame, global_color_map.as_ref());
-            frame.raster_data = rgba_raster_data;
-            frame.local_color_map = None;
-            frame.image_descriptor.m = false;
-        }
-        screen_descriptor.m = false;
-        global_color_map = None;
-    }
-
-    Ok(Gif {
-        signature: signature.to_string(),
+    Ok(Gif::new(
+        signature.to_string(),
         screen_descriptor,
         global_color_map,
         frames,
-    })
+    ))
 }
 
-fn rgba_raster_data(frame: &Frame, global_color_map: Option<&ColorMap>) -> Vec<u8> {
-    let color_map = if frame.image_descriptor.m {
-        frame
-            .local_color_map
-            .as_ref()
-            .expect("expected local color map not present")
-    } else {
-        global_color_map.expect("expected global color map not present")
-    };
-
-    frame
-        .raster_data
+fn rgba_raster_data(
+    raster_data: &Vec<u8>,
+    graphic_control_extension: Option<&GraphicControlExtension>,
+    color_map: &ColorMap,
+) -> Vec<u8> {
+    raster_data
         .iter()
         .map(|index| {
             table_index_to_rgba(
                 *index,
                 color_map,
-                frame
-                    .graphic_control_extension
-                    .as_ref()
-                    .and_then(|ext| ext.transparent_color_index),
+                graphic_control_extension.and_then(|ext| ext.transparent_color_index()),
             )
         })
         .flatten()
@@ -88,15 +72,20 @@ fn table_index_to_rgba(
         .filter(|alpha_index| index == *alpha_index)
         .map(|_| 0x00u8)
         .unwrap_or(0xFFu8);
-    vec![rgba.r, rgba.g, rgba.b, alpha]
+    vec![rgba.r(), rgba.g(), rgba.b(), alpha]
 }
 
-fn frames(bytes: &Vec<u8>, cursor: usize) -> (Vec<Frame>, usize) {
+fn frames(
+    bytes: &Vec<u8>,
+    color_output: &ColorOutput,
+    global_color_map: Option<&ColorMap>,
+    cursor: usize,
+) -> (Vec<Frame>, usize) {
     let mut mut_index = cursor;
     let mut frames: Vec<Frame> = Vec::new();
 
     while bytes[mut_index] != 0x3b {
-        let (frame, index) = frame(bytes, mut_index);
+        let (frame, index) = frame(bytes, color_output, global_color_map, mut_index);
         mut_index = index;
         frames.push(frame);
     }
@@ -104,7 +93,12 @@ fn frames(bytes: &Vec<u8>, cursor: usize) -> (Vec<Frame>, usize) {
     (frames, mut_index)
 }
 
-fn frame(bytes: &Vec<u8>, cursor: usize) -> (Frame, usize) {
+fn frame(
+    bytes: &Vec<u8>,
+    color_output: &ColorOutput,
+    global_color_map: Option<&ColorMap>,
+    cursor: usize,
+) -> (Frame, usize) {
     let mut index = cursor;
     let mut graphic_control_extension: Option<GraphicControlExtension> = None;
 
@@ -126,38 +120,79 @@ fn frame(bytes: &Vec<u8>, cursor: usize) -> (Frame, usize) {
 
     let (image_descriptor, index) = steps::image_descriptor::decode(bytes, index);
     let (color_map, index) =
-        steps::color_map::decode(bytes, image_descriptor.pixel, image_descriptor.m, index);
+        steps::color_map::decode(bytes, image_descriptor.pixel(), image_descriptor.m(), index);
     let (raster_data, index) = steps::raster_data::decode(bytes, index);
 
+    let rgba_rd = match color_output {
+        ColorOutput::RGBA => {
+            let color_map = if image_descriptor.m() {
+                color_map
+                    .as_ref()
+                    .expect("expected local color map not present")
+            } else {
+                global_color_map
+                    .as_ref()
+                    .expect("expected global color map not present")
+            };
+
+            Some(rgba_raster_data(
+                &raster_data,
+                graphic_control_extension.as_ref(),
+                color_map,
+            ))
+        }
+        ColorOutput::ColorMap => None,
+    };
+
     (
-        Frame {
+        Frame::new(
             image_descriptor,
-            local_color_map: color_map,
+            color_map,
             raster_data,
+            rgba_rd,
             graphic_control_extension,
-        },
+        ),
         index,
     )
 }
 
 #[test]
-pub fn should_decode() {
+pub fn should_decode_using_color_map_mode() {
     let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
     let gif = decode(file, ColorOutput::ColorMap).unwrap();
 
-    assert_eq!("GIF89a", gif.signature);
-    assert_eq!(106, gif.frames.len());
-    gif.frames.iter().for_each(|frame| {
+    assert_eq!("GIF89a", gif.signature());
+    assert_eq!(106, gif.frames().len());
+    gif.frames().iter().for_each(|frame| {
         assert_eq!(
-            frame.raster_data.len(),
-            (frame.image_descriptor.image_width as u32 * frame.image_descriptor.image_height as u32)
-                as usize
+            frame.raster_data().len(),
+            (frame.image_descriptor().image_width() as u32
+                * frame.image_descriptor().image_height() as u32) as usize
         );
+        assert_eq!(&None, frame.rgba_raster_data());
+        assert!(frame.local_color_map().is_some())
+    });
+}
 
-        if frame.image_descriptor.m {
-            assert!(frame.local_color_map.is_some())
-        } else {
-            assert!(frame.local_color_map.is_none())
-        }
+#[test]
+pub fn should_decode_using_rgba_mode() {
+    let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
+    let gif = decode(file, ColorOutput::RGBA).unwrap();
+
+    assert_eq!("GIF89a", gif.signature());
+    assert_eq!(106, gif.frames().len());
+    gif.frames().iter().for_each(|frame| {
+        assert_eq!(
+            frame.raster_data().len(),
+            (frame.image_descriptor().image_width() as u32
+                * frame.image_descriptor().image_height() as u32) as usize
+        );
+        assert_eq!(
+            frame.rgba_raster_data().as_ref().unwrap().len(),
+            (frame.image_descriptor().image_width() as u32
+                * frame.image_descriptor().image_height() as u32
+                * 4) as usize
+        );
+        assert!(frame.local_color_map().is_some())
     });
 }

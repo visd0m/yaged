@@ -1,12 +1,7 @@
-use std::collections::HashMap;
 use crate::types::{ColorMap, Rgb};
+use std::collections::HashMap;
 
-pub fn decode(
-    bytes: &Vec<u8>,
-    pixel: u8,
-    m: bool,
-    cursor: usize,
-) -> (Option<ColorMap>, usize) {
+pub fn decode(bytes: &Vec<u8>, pixel: u8, m: bool, cursor: usize) -> (Option<ColorMap>, usize) {
     if m {
         let mut map = HashMap::new();
 
@@ -16,11 +11,7 @@ pub fn decode(
 
         entries
             .chunks(3 as usize)
-            .map(|rgb| Rgb {
-                r: rgb[0],
-                g: rgb[1],
-                b: rgb[2],
-            })
+            .map(|rgb| Rgb::new(rgb[0], rgb[1], rgb[2]))
             .enumerate()
             .for_each(|(index, rgb)| {
                 map.insert(index, rgb);

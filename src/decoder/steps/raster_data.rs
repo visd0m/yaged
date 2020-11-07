@@ -1,6 +1,6 @@
 use lzw::LsbReader;
 
-pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (Vec<u8>, usize) {
+pub fn decode(bytes: &[u8], cursor: usize) -> (Vec<u8>, usize) {
     // data is LZW compressed
     let code_size = bytes[cursor];
     let mut lzw_decoder = lzw::Decoder::new(lzw::LsbReader::new(), code_size);
@@ -18,7 +18,7 @@ pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (Vec<u8>, usize) {
 }
 
 pub fn decode_block(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     cursor: usize,
     decoder: &mut lzw::Decoder<LsbReader>,
     decoded: &mut Vec<u8>,

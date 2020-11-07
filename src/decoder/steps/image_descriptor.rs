@@ -1,7 +1,7 @@
 use crate::decoder::steps::nth_bit;
 use crate::types::ImageDescriptor;
 
-pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (ImageDescriptor, usize) {
+pub fn decode(bytes: &[u8], cursor: usize) -> (ImageDescriptor, usize) {
     let to_index = cursor + 10;
     let image_descriptor = &bytes[cursor..to_index];
 

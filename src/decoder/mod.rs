@@ -35,7 +35,7 @@ pub fn decode(
     let (frames, _cursor) = frames(bytes, &color_output, global_color_map.as_ref(), cursor);
 
     Ok(Gif::new(
-        signature.to_string(),
+        signature,
         screen_descriptor,
         global_color_map,
         frames,
@@ -43,7 +43,7 @@ pub fn decode(
 }
 
 fn rgba_raster_data(
-    raster_data: &Vec<u8>,
+    raster_data: &[u8],
     graphic_control_extension: Option<&GraphicControlExtension>,
     color_map: &ColorMap,
 ) -> Vec<u8> {
@@ -76,7 +76,7 @@ fn table_index_to_rgba(
 }
 
 fn frames(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     color_output: &ColorOutput,
     global_color_map: Option<&ColorMap>,
     cursor: usize,
@@ -94,7 +94,7 @@ fn frames(
 }
 
 fn frame(
-    bytes: &Vec<u8>,
+    bytes: &[u8],
     color_output: &ColorOutput,
     global_color_map: Option<&ColorMap>,
     cursor: usize,
@@ -107,11 +107,8 @@ fn frame(
             let (block, cursor) = steps::extension_block::decode(bytes, index);
             index = cursor;
 
-            match block {
-                Some(ExtensionBlock::GraphicControlExtension(extension)) => {
-                    graphic_control_extension = Some(extension);
-                }
-                _ => {}
+            if let Some(ExtensionBlock::GraphicControlExtension(extension)) = block {
+                graphic_control_extension = Some(extension);
             }
         } else {
             index += 1;

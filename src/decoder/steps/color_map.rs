@@ -1,7 +1,7 @@
 use crate::types::{ColorMap, Rgb};
 use std::collections::HashMap;
 
-pub fn decode(bytes: &Vec<u8>, pixel: u8, m: bool, cursor: usize) -> (Option<ColorMap>, usize) {
+pub fn decode(bytes: &[u8], pixel: u8, m: bool, cursor: usize) -> (Option<ColorMap>, usize) {
     if m {
         let mut map = HashMap::new();
 

@@ -1,7 +1,7 @@
 use crate::decoder::steps::nth_bit;
 use crate::types::{ExtensionBlock, GraphicControlExtension};
 
-pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (Option<ExtensionBlock>, usize) {
+pub fn decode(bytes: &[u8], cursor: usize) -> (Option<ExtensionBlock>, usize) {
     let label = bytes[cursor + 1];
     match label {
         0xf9 => {
@@ -12,10 +12,7 @@ pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (Option<ExtensionBlock>, usize)
     }
 }
 
-pub fn graphic_control_extension(
-    bytes: &Vec<u8>,
-    cursor: usize,
-) -> (GraphicControlExtension, usize) {
+pub fn graphic_control_extension(bytes: &[u8], cursor: usize) -> (GraphicControlExtension, usize) {
     let flags = bytes[cursor + 1];
     let disposal_method = (flags << 3) >> 5;
     let user_input_flag = nth_bit(flags, 1);

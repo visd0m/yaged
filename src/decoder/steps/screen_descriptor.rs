@@ -1,7 +1,7 @@
 use crate::decoder::steps::nth_bit;
 use crate::types::ScreenDescriptor;
 
-pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (ScreenDescriptor, usize) {
+pub fn decode(bytes: &[u8], cursor: usize) -> (ScreenDescriptor, usize) {
     let to_index = cursor + 7;
     let screen_descriptor = &bytes[cursor..to_index];
 
@@ -16,14 +16,7 @@ pub fn decode(bytes: &Vec<u8>, cursor: usize) -> (ScreenDescriptor, usize) {
     let background: u8 = screen_descriptor[5];
 
     (
-        ScreenDescriptor {
-            width: screen_width,
-            height: screen_height,
-            m,
-            cr,
-            pixel,
-            background,
-        },
+        ScreenDescriptor::new(screen_width, screen_height, m, cr, pixel, background),
         to_index,
     )
 }

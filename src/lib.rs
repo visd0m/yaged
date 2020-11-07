@@ -4,8 +4,20 @@
 //! ```
 //! use {std::fs::File, std::path::Path};
 //!
+//! // decodes a gif using ColorMap ColorOutput mode
 //! let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
-//! let gif = yaged::decoder::decode(file, yaged::decoder::ColorOutput::ColorMap).unwrap();
+//! let color_map_gif = yaged::decoder::decode(file, yaged::decoder::ColorOutput::ColorMap).unwrap();
+//! color_map_gif.frames().iter().for_each(|frame| {
+//!  assert!(frame.rgba_raster_data().is_none())
+//! });
+//!
+//! // decodes a gif using RGBA ColorOutput mode
+//! let file = &mut File::open(Path::new("./ascii-gif-example.gif")).unwrap();
+//! let rgba_gif = yaged::decoder::decode(file, yaged::decoder::ColorOutput::RGBA).unwrap();
+//! // with this color output mode the rgba_raster_data() will be present in each frame
+//! rgba_gif.frames().iter().for_each(|frame| {
+//!  assert!(frame.rgba_raster_data().is_some())
+//! });
 //! ```
 
 pub mod decoder;

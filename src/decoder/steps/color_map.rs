@@ -10,7 +10,7 @@ pub fn decode(bytes: &[u8], pixel: u8, m: bool, cursor: usize) -> (Option<ColorM
         let entries = &bytes[cursor..to_index];
 
         entries
-            .chunks(3 as usize)
+            .chunks(3_usize)
             .map(|rgb| Rgb::new(rgb[0], rgb[1], rgb[2]))
             .enumerate()
             .for_each(|(index, rgb)| {

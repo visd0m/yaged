@@ -8,7 +8,7 @@ pub fn encode(
     bytes: &mut Vec<u8>,
     signature: &str,
     cursor: usize,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<usize, Box<dyn std::error::Error>> {
     let signature_bytes: Vec<u8> = signature.bytes().collect();
 
     if signature_bytes.len() != SIGNATURE_BYTES_LENGTH {
@@ -22,7 +22,7 @@ pub fn encode(
             bytes.insert(index, *byte);
         });
 
-    Ok(())
+    Ok(cursor + SIGNATURE_BYTES_LENGTH)
 }
 
 #[test]

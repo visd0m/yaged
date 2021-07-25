@@ -1,6 +1,8 @@
 use crate::encoder::steps::signature;
 use crate::types::Gif;
 use std::fmt::{Display, Formatter};
+
+use self::steps::screen_descriptor;
 #[cfg(test)]
 use {
     crate::decoder::{decode, ColorOutput},
@@ -25,6 +27,7 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
+/// Encode a Gif in a bytes vec.
 pub fn encode(gif: Gif) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut encoded: Vec<u8> = Vec::new();
 
@@ -36,7 +39,8 @@ pub fn encode(gif: Gif) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         return Err(Box::new(Error::UnhandledInterlacedFlag));
     }
 
-    signature::encode(&mut encoded, &gif.signature().to_string(), 0)?;
+    let mut cursor = signature::encode(&mut encoded, &gif.signature().to_string(), 0)?;
+    cursor = screen_descriptor::encode(&mut encoded, &gif.screen_descriptor(), cursor)?;
 
     Ok(encoded)
 }

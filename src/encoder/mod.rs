@@ -28,11 +28,15 @@ impl std::error::Error for Error {}
 pub fn encode(gif: Gif) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let mut encoded: Vec<u8> = Vec::new();
 
-    if gif.frames.iter().any(|frame| frame.image_descriptor.i) {
+    if gif
+        .frames()
+        .iter()
+        .any(|frame| frame.image_descriptor().i())
+    {
         return Err(Box::new(Error::UnhandledInterlacedFlag));
     }
 
-    signature::encode(&mut encoded, &gif.signature, 0)?;
+    signature::encode(&mut encoded, &gif.signature().to_string(), 0)?;
 
     Ok(encoded)
 }

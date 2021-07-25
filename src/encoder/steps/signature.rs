@@ -1,10 +1,12 @@
+use core::str;
+
 use crate::encoder;
 
 const SIGNATURE_BYTES_LENGTH: usize = 6;
 
 pub fn encode(
     bytes: &mut Vec<u8>,
-    signature: &String,
+    signature: &str,
     cursor: usize,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let signature_bytes: Vec<u8> = signature.bytes().collect();

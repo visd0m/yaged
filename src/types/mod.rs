@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, u8};
 
 pub type ColorMap = HashMap<usize, Rgb>;
 
@@ -46,6 +46,8 @@ pub struct ScreenDescriptor {
     cr: u8,
     pixel: u8,
     background: u8,
+    sort: bool,
+    aspect_ratio: u8,
 }
 
 impl ScreenDescriptor {
@@ -68,7 +70,22 @@ impl ScreenDescriptor {
     pub fn background(&self) -> u8 {
         self.background
     }
-    pub fn new(width: u16, height: u16, m: bool, cr: u8, pixel: u8, background: u8) -> Self {
+    pub fn sort(&self) -> bool {
+        self.sort
+    }
+    pub fn aspect_ratio(&self) -> u8 {
+        self.aspect_ratio
+    }
+    pub fn new(
+        width: u16,
+        height: u16,
+        m: bool,
+        cr: u8,
+        sort: bool,
+        pixel: u8,
+        background: u8,
+        aspect_ratio: u8,
+    ) -> Self {
         ScreenDescriptor {
             width,
             height,
@@ -76,6 +93,8 @@ impl ScreenDescriptor {
             cr,
             pixel,
             background,
+            sort,
+            aspect_ratio,
         }
     }
     pub fn set_m(&mut self, m: bool) {

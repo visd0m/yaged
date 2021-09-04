@@ -111,6 +111,7 @@ fn frame(
                 graphic_control_extension = Some(extension);
             }
         } else {
+            // skip unhandled extension block
             index += 1;
         }
     }
@@ -190,6 +191,13 @@ pub fn should_decode_using_rgba_mode() {
                 * frame.image_descriptor().image_height() as u32
                 * 4) as usize
         );
-        assert!(frame.local_color_map().is_some())
+
+        if frame.image_descriptor().m() {
+            assert!(frame.local_color_map().is_some())
+        } else {
+            assert!(frame.local_color_map().is_none())
+        }
+
+        assert!(frame.graphic_control_extension().is_some())
     });
 }

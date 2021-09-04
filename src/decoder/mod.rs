@@ -111,6 +111,7 @@ fn frame(
                 graphic_control_extension = Some(extension);
             }
         } else {
+            // skip unhandled extension block
             index += 1;
         }
     }
